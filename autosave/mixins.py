@@ -27,6 +27,7 @@ from django.utils.encoding import force_text
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
+from django.utils import timezone
 
 
 class AdminAutoSaveMixin(object):
@@ -79,15 +80,12 @@ class AdminAutoSaveMixin(object):
                     'cls_name': ".".join([self.__module__, self.__class__.__name__]),
                 })
 
-<<<<<<< HEAD
         # Raise exception if self.autosave_last_modified_field is not set
         try:
             opts.get_field(self.autosave_last_modified_field)
         except FieldDoesNotExist:
             raise
 
-=======
->>>>>>> 336e43fe5ce63db4c3cf832b0f8d28a3a79d086f
         if not object_id:
             autosave_url = reverse("admin:%s_%s_add" % info)
             add_log_entries = LogEntry.objects.filter(
@@ -112,7 +110,13 @@ class AdminAutoSaveMixin(object):
                 updated = updated.astimezone(dateutil.tz.tzlocal())
                 # Make sure date modified time doesn't predate Unix-time.
                 # I'm pretty confident they didn't do any Django autosaving in 1969.
-                updated = max(updated, pytz.utc.localize(datetime(year=1970, month=1, day=1)))
+                updated = max(
+                    updated,
+                    timezone.make_aware(
+                        datetime(year=1970, month=1, day=1),
+                        timezone=timezone.get_current_timezone(),
+                    )
+                )
 
         if obj and not self.has_change_permission(request, obj):
             raise PermissionDenied
@@ -123,7 +127,9 @@ class AdminAutoSaveMixin(object):
             'autosave_url': autosave_url,
             'is_add_view': not(object_id),
             'server_time_epoch': time.mktime(datetime.now().timetuple()),
-            'last_updated_epoch': time.mktime(updated.timetuple()) if updated else None,
+            'last_updated_epoch': time.mktime(
+                timezone.localtime(updated).timetuple()
+            ) if updated else None,
             'is_recovered_autosave': bool(request.GET.get('is_recovered')),
         }
 
