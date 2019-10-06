@@ -15,7 +15,10 @@ try:
 except ImportError:
     from django.contrib.admin.util import unquote
 from django.contrib.contenttypes.models import ContentType
-from django.core.urlresolvers import reverse
+try:
+    from django.core.urlresolvers import reverse
+except ImportError:
+    from django.urls import reverse
 from django.core.exceptions import ImproperlyConfigured, PermissionDenied
 from django.db.models.fields import FieldDoesNotExist
 try:
