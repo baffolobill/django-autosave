@@ -5,7 +5,7 @@ import textwrap
 from datetime import datetime
 from urllib.parse import urlparse
 import pytz
-import dateutil
+import dateutil.tz
 
 from django import forms
 from django.contrib import messages
